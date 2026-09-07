@@ -66,9 +66,29 @@ export const createProduct = async (
     body: JSON.stringify(product),
   });
   if (!response.ok) {
-    throw new Error(`Failed to create product: ${response.statusText}`);
+    let errorMessage = `Failed to create product: ${response.statusText}`;
+    try {
+      const errorData = await response.json();
+      if (errorData && typeof errorData === "object" && errorData.msg) {
+        errorMessage = String(errorData.msg);
+      }
+    } catch {
+      try {
+        const errorText = await response.text();
+        if (errorText) {
+          errorMessage = errorText;
+        }
+      } catch {
+        // ignore secondary parsing failures and keep default message
+      }
+    }
+    throw new Error(errorMessage);
   }
-  return response.json();
+  try {
+    return await response.json();
+  } catch {
+    throw new Error("Failed to parse product response");
+  }
 };
 
 export const deleteProduct = async (id: string): Promise<void> => {

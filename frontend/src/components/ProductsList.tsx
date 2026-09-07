@@ -51,9 +51,7 @@ export const ProductsList = () => {
         category: selectedCategory || undefined,
         status: selectedStatus || undefined,
       };
-      console.log("[getProducts] request", params);
       const response = await getProducts(params);
-      console.log("[getProducts] response", response);
       setProductList(response.data || []);
       setTotalCount(response.total || 0);
     } catch (error) {
@@ -382,23 +380,25 @@ export const ProductsList = () => {
         </table>
       </div>
       <div className="flex justify-center mt-4">
-        <button
-          className="mx-1 px-3 py-1 bg-gray-200 rounded"
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage(currentPage - 1)}
-        >
-          Previous
-        </button>
+        {currentPage > 1 && (
+          <button
+            className="mx-1 px-3 py-1 bg-gray-200 rounded"
+            onClick={() => setCurrentPage(currentPage - 1)}
+          >
+            Previous
+          </button>
+        )}
         <span className="mx-2 self-center">
           Page {currentPage} of {totalPages || 1}
         </span>
-        <button
-          className="mx-1 px-3 py-1 bg-gray-200 rounded"
-          disabled={currentPage === totalPages || totalPages === 0}
-          onClick={() => setCurrentPage(currentPage + 1)}
-        >
-          Next
-        </button>
+        {currentPage < totalPages && (
+          <button
+            className="mx-1 px-3 py-1 bg-gray-200 rounded"
+            onClick={() => setCurrentPage(currentPage + 1)}
+          >
+            Next
+          </button>
+        )}
       </div>
       {editingProduct && (
         <EditProductModal

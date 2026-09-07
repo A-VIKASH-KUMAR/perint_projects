@@ -69,12 +69,14 @@ export const ViewProductPage = () => {
   }
 
   return (
-    <div className="p-6">
-      <Link to="/" className="text-blue-500 hover:underline mb-4 inline-block">
-        &larr; Back to products
-      </Link>
+    <div className="p-6 flex flex-col items-center">
+      <div className="w-full flex justify-start">
+        <Link to="/" className="text-blue-500 hover:underline mb-4 inline-block">
+          &larr; Back to products
+        </Link>
+      </div>
       <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4">Product Details</h2>
+        <h2 className="text-xl font-bold mb-4 text-center">Product Details</h2>
         <div className="space-y-2">
           <p>
             <strong>Name:</strong> {product.name}

@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { mockProducts } from "../utils/products_data";
 import { createProduct } from "../services/products";
+import { Error as ProductError } from "./Error";
 
 type NewProduct = {
-  id: string;
   name: string;
   category: string;
   price: string;
@@ -13,23 +12,11 @@ type NewProduct = {
   lastUpdated: string;
 };
 
-const getNextProductId = () => {
-  const numericIds = mockProducts
-    .map((product) => Number(String(product.id).match(/\d+/)?.[0] ?? 0))
-    .filter((value) => Number.isFinite(value));
-
-  const latestId = numericIds.length > 0 ? Math.max(...numericIds) : 100;
-  const nextId = latestId + 1;
-  const padded = String(nextId).padStart(3, "0");
-  return `P${padded}`;
-};
-
 export const AddProduct: React.FC<{
   onProductAdded?: (product: NewProduct) => void;
 }> = ({ onProductAdded }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    id: getNextProductId(),
     name: "",
     category: "",
     price: "",
@@ -37,6 +24,7 @@ export const AddProduct: React.FC<{
     status: "In Stock",
     lastUpdated: new Date().toISOString().split("T")[0],
   });
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -47,27 +35,14 @@ export const AddProduct: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     try {
-      const created = await createProduct({
-        name: formData.name,
-        category: formData.category,
-        price: formData.price,
-        stock: formData.stock,
-        status: formData.status,
-      });
-      mockProducts.push({
-        id: created.id || formData.id,
-        name: created.name,
-        category: created.category,
-        price: created.price,
-        stock: created.stock,
-        status: created.status,
-        lastUpdated: new Date().toISOString().split("T")[0],
-      });
+      const response = await createProduct(formData);
       onProductAdded?.(formData);
       navigate("/");
-    } catch (error) {
-      console.error("Failed to create product:", error);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to create product";
+      setError(message);
     }
   };
 
@@ -75,12 +50,6 @@ export const AddProduct: React.FC<{
     <form onSubmit={handleSubmit} className="p-4 border rounded shadow-md">
       <h2 className="text-xl font-bold mb-4">Add New Product</h2>
       <div className="grid grid-cols-1 gap-4">
-        <div className="border p-2 bg-gray-50 rounded">
-          <label className="block text-sm text-gray-600 mb-1">
-            Generated Product ID
-          </label>
-          <div className="font-medium">{formData.id}</div>
-        </div>
         <input
           name="name"
           placeholder="Name"
@@ -142,6 +111,7 @@ export const AddProduct: React.FC<{
           <option value="Out of Stock">Out of Stock</option>
           <option value="Discontinued">Discontinued</option>
         </select>
+        {error && <ProductError message={error} />}
         <button type="submit" className="bg-blue-500 text-white p-2 rounded cursor-default hover:cursor-pointer">
           Add Product
         </button>
