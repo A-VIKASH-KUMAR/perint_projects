@@ -380,25 +380,27 @@ export const ProductsList = () => {
         </table>
       </div>
       <div className="flex justify-center mt-4">
-        {currentPage > 1 && (
+        {
           <button
-            className="mx-1 px-3 py-1 bg-gray-200 rounded"
+            className={`mx-1 px-3 py-1 bg-gray-200 rounded ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-300'}`}
+            disabled={currentPage === 1}
             onClick={() => setCurrentPage(currentPage - 1)}
           >
             Previous
           </button>
-        )}
+        }
         <span className="mx-2 self-center">
           Page {currentPage} of {totalPages || 1}
         </span>
-        {currentPage < totalPages && (
+        {
           <button
-            className="mx-1 px-3 py-1 bg-gray-200 rounded"
+            className={`mx-1 px-3 py-1 bg-gray-200 rounded ${currentPage === totalPages || totalPages === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-300'}`}
+            disabled={currentPage === totalPages || totalPages === 0}
             onClick={() => setCurrentPage(currentPage + 1)}
           >
             Next
           </button>
-        )}
+        }
       </div>
       {editingProduct && (
         <EditProductModal
