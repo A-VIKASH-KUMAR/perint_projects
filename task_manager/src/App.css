@@ -1,8 +1,27 @@
-html {
-  color-scheme: light dark;
-  font-family: system-ui;
+/* Ensure the container takes up the full width and uses flexbox for centering */
+.header {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  justify-content: center; /* Centers horizontally */
+  align-items: center;     /* Centers vertically */
+  width: 100%;
+  /* Optional: add a specific height if you want vertical centering within a taller header */
+  min-height: 60px; 
+}
+
+/* Reset default margins on the h1 which can often offset centering */
+.header-title {
+  margin: 0;
+  text-align: center;
+}
+
+/* If you want the header itself centered on the page: */
+html, body {
   height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
