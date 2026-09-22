@@ -1,0 +1,1 @@
+export const LOGO_URL = "https://www.perintsystems.com/wp-content/uploads/2023/08/Orange-Black-e1682520418276.png"
