@@ -1,47 +1,94 @@
 import { Header } from "./components/Header";
 import { TaskTable } from "./components/TaskTable";
 import { TaskModal } from "./components/TaskModal";
-import { Outlet, createBrowserRouter, useLoaderData } from "react-router";
-import { useState } from "react";
+import { Login } from "./components/Login";
+import { Register } from "./components/Register";
+import {
+  Outlet,
+  createBrowserRouter,
+  useLoaderData,
+  Navigate,
+} from "react-router";
+import { useEffect, useState } from "react";
+import {
+  createTask,
+  getTasks,
+  updateTask,
+  deleteTask,
+} from "./services/tasksServics";
+import { Task } from "./components/TaskTable";
 
-interface Task {
-  taskName: string;
-  description: string;
+interface TasksResponse {
+  data: Task[];
 }
 
 export const Home = () => {
-  const initialTasks = useLoaderData() as Task[];
+  const userId = JSON.parse(localStorage.getItem("currentUser")!).id;
+  const initialTasks: Task[] = [
+    {
+      id: "",
+      title: "",
+      description: "",
+      status: "",
+      dueDate: "",
+      assignees: [userId],
+    },
+  ];
+  const loadTasks = async () => {
+    const response = await getTasks();
+    if (response?.ok) {
+      const tasksData: TasksResponse = await response.json();
+      setTasks(tasksData.data);
+      return tasksData.data;
+    }
+    return [];
+  };
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingTaskIndex, setEditingTaskIndex] = useState<number | null>(null);
-
-  const handleAddTask = (taskName: string, description: string) => {
-    const updatedTasks =
-      editingTaskIndex === null
-        ? [...tasks, { taskName, description }]
-        : tasks.map((task, index) =>
-            index === editingTaskIndex ? { ...task, description } : task
-          );
-    setTasks(updatedTasks);
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  useEffect(() => {
+    loadTasks();
+  }, []);
+  const handleAddTask = async (title: string, description: string) => {
+    if (editingTaskId === null) {
+      const response = await createTask({ title, description });
+      if (!response?.ok) {
+        return;
+      }
+      const taskData: Task = await response.json();
+      const updatedTasks = [...tasks, taskData];
+      setTasks(updatedTasks);
+    } else {
+      // const existingTask = tasks[editingTaskIndex];
+      const response = await updateTask({
+        id: editingTaskId,
+        title,
+        description,
+      });
+      if (!response?.ok) {
+        return;
+      }
+      let taskData = await loadTasks()
+      setTasks(taskData);
+    }
     setIsModalOpen(false);
-    setEditingTaskIndex(null);
+    setEditingTaskId(null);
   };
 
-  const handleEditTask = (index: number) => {
-    setEditingTaskIndex(index);
+  const handleEditTask = (id: string) => {
+    setEditingTaskId(id);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setEditingTaskIndex(null);
+    setEditingTaskId(null);
   };
 
-  const handleDeleteTask = (index: number) => {
-    const updatedTasks = tasks.filter((_, i) => i !== index);
-    setTasks(updatedTasks);
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+  const handleDeleteTask = async (id: string) => {
+    const deleteResponse = await deleteTask(id);
+    const tasks = await loadTasks();
+    setTasks(tasks);
   };
 
   return (
@@ -57,35 +104,90 @@ export const Home = () => {
         onClose={handleCloseModal}
         onSubmit={handleAddTask}
         initialValues={
-          editingTaskIndex === null
+          editingTaskId === null
             ? undefined
-            : tasks[editingTaskIndex]
+            : (() => {
+                const task = tasks.find(({ id }) => id === editingTaskId);
+                return task
+                  ? {
+                      title: task.title,
+                      description: task.description ?? "",
+                    }
+                  : undefined;
+              })()
         }
-        isEditing={editingTaskIndex !== null}
+        isEditing={editingTaskId!== null}
       />
     </div>
   );
+};
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const currentUser = localStorage.getItem("currentUser");
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
+  }
+  return <>{children}</>;
+};
+
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const currentUser = localStorage.getItem("currentUser");
+  if (currentUser) {
+    return <Navigate to="/" replace />;
+  }
+  return <>{children}</>;
 };
 
 export function App() {
   return (
     <div>
       <Header />
-      <Home />
       <Outlet />
     </div>
   );
 }
 
-export const routes = createBrowserRouter([{
-  path: "/",
-  element: <App />,
-  loader: () => {
-    const stored = localStorage.getItem("tasks");
-    return stored ? JSON.parse(stored) : [];
+export const routes = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    loader: () => {
+      const stored = localStorage.getItem("tasks");
+      return stored ? JSON.parse(stored) : [];
+    },
+    children: [
+      {
+        index: true,
+        element: (
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "add-task",
+        element: (
+          <ProtectedRoute>
+            <div>Use the Add Task button on the home page</div>
+          </ProtectedRoute>
+        ),
+      },
+    ],
   },
-  children: [{
-    path: "/add-task",
-    element: <div>Use the Add Task button on the home page</div>,
-  }]
-}]);
+  {
+    path: "/login",
+    element: (
+      <PublicRoute>
+        <Login />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: "/register",
+    element: (
+      <PublicRoute>
+        <Register />
+      </PublicRoute>
+    ),
+  },
+]);

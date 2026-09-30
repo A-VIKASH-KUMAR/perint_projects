@@ -1,8 +1,10 @@
+import { useEffect } from "react";
+
 interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (taskName: string, description: string) => void;
-  initialValues?: { taskName: string; description: string };
+  onSubmit: (title: string, description: string) => void;
+  initialValues?: { title: string; description: string };
   isEditing?: boolean;
 }
 
@@ -18,9 +20,9 @@ export const TaskModal = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
-    const taskName = (form.elements.namedItem('taskName') as HTMLInputElement).value;
+    const title = (form.elements.namedItem('taskName') as HTMLInputElement).value;
     const description = (form.elements.namedItem('taskDescription') as HTMLInputElement).value;
-    onSubmit(taskName, description);
+    onSubmit(title, description);
     form.reset();
     onClose();
   };
@@ -36,7 +38,7 @@ export const TaskModal = ({
               type="text"
               name="taskName"
               id="taskName"
-              defaultValue={initialValues?.taskName ?? ""}
+              defaultValue={initialValues?.title ?? ""}
               readOnly={isEditing}
               required
             />
