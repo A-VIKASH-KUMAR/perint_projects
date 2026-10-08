@@ -17,9 +17,9 @@ export const createTask = async (task:Task) => {
   }
 };
 
-export const getTasks = async () => {
+export const getTasks = async (page:number, limit:number) => {
   try {
-    const tasks = await fetch(`${BASE_URL}/api/tasks`, {
+    const tasks = await fetch(`${BASE_URL}/api/tasks?page=${page}&limit=${limit}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,

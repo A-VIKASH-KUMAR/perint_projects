@@ -34,8 +34,8 @@ export const Home = () => {
       assignees: [userId],
     },
   ];
-  const loadTasks = async () => {
-    const response = await getTasks();
+  const loadTasks = async (page:number, offset:number) => {
+    const response = await getTasks(page,offset);
     if (response?.ok) {
       const tasksData: TasksResponse = await response.json();
       setTasks(tasksData.data);
@@ -46,8 +46,11 @@ export const Home = () => {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [currentPage, setCurrentpage] = useState(1)
+  const [itemsPerPage] = useState(10)
+  const offset = itemsPerPage * (currentPage-1)
   useEffect(() => {
-    loadTasks();
+    loadTasks(currentPage, itemsPerPage*currentPage);
   }, []);
   const handleAddTask = async (title: string, description: string) => {
     if (editingTaskId === null) {
@@ -68,7 +71,7 @@ export const Home = () => {
       if (!response?.ok) {
         return;
       }
-      let taskData = await loadTasks()
+      let taskData = await loadTasks(currentPage, offset)
       setTasks(taskData);
     }
     setIsModalOpen(false);
@@ -87,7 +90,7 @@ export const Home = () => {
 
   const handleDeleteTask = async (id: string) => {
     const deleteResponse = await deleteTask(id);
-    const tasks = await loadTasks();
+    const tasks = await loadTasks(currentPage, offset);
     setTasks(tasks);
   };
 
@@ -95,6 +98,8 @@ export const Home = () => {
     <div>
       <TaskTable
         tasks={tasks}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
         onAddTask={() => setIsModalOpen(true)}
         onEditTask={handleEditTask}
         onDeleteTask={handleDeleteTask}
@@ -116,7 +121,7 @@ export const Home = () => {
                   : undefined;
               })()
         }
-        isEditing={editingTaskId!== null}
+        isEditing={editingTaskId !== null}
       />
     </div>
   );

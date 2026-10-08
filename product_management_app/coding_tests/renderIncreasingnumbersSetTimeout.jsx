@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 const ShowCounts = (props) => { 
   console.log(props) 
 const [number, setNumber] = useState([props.number]);
-let result =[]
 useEffect(()=> {
  const timerId =  setTimeout(()=> { 
   

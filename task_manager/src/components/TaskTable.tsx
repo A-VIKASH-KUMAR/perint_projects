@@ -1,3 +1,5 @@
+import { SetStateAction, useState } from "react";
+
 export interface Task {
   id?: string;
   title: string;
@@ -8,12 +10,14 @@ export interface Task {
 }
 interface TaskTableProps {
   tasks: Task[];
+  currentPage:number,
+  itemsPerPage:number,
   onAddTask: () => void;
   onEditTask: (id: string) => void;
   onDeleteTask: (id: string) => void;
 }
 
-export const TaskTable = ({ tasks, onAddTask, onEditTask, onDeleteTask
+export const TaskTable = ({ tasks,currentPage, itemsPerPage, onAddTask, onEditTask, onDeleteTask
 
  }: TaskTableProps) => {
   console.log("tasks", tasks);
@@ -56,8 +60,11 @@ export const TaskTable = ({ tasks, onAddTask, onEditTask, onDeleteTask
               </tr>
             ))}
           </tbody>
+          
         </table>
       )}
+      <button disabled={currentPage === 1}>Previous</button>
+      <button disabled={tasks.length <=itemsPerPage }>Next</button>
     </div>
   );
 };
