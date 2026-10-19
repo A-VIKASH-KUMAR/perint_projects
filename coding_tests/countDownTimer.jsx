@@ -1,4 +1,3 @@
-import React from 'react';
 import { useState, useEffect, useRef } from 'react'
 
 // 6. Create a Countdown Timer

@@ -136,3 +136,47 @@ const moveZerosToEnd = (input) => {
 
 console.log("move zeroes to end", moveZerosToEnd([0, 1, 0, 3, 12]));
 
+// 9. Flatten a Nested Array
+   
+//    - Input: [1, [2, [3, 4]], 5]
+//    - Output: [1, 2, 3, 4, 5]
+//    - Challenge: Solve recursively without using flat(Infinity).
+
+const flatenAArray = (arr) => {
+    const flattendArray = arr.reduce((acc,current)=> {
+        if (Array.isArray(current)) {
+            acc.push(...flatenAArray(current))
+        }else {
+            acc.push(current)
+        }
+        
+        return acc
+    }, [])
+    return flattendArray
+}
+
+console.log("flatttened array", flatenAArray([1, [2, [3, 4]], 5]));
+
+
+// 10. Sort an Array by Frequency
+    
+//     - Input: [4, 4, 1, 2, 2, 2, 3]
+//     - Output: [2, 2, 2, 4, 4, 1, 3]
+//     - Challenge: Sort by descending frequency. If frequencies tie, sort by ascending numeric order
+
+const sortArrayByFrequency = (nums) => {
+    const freqObj = {}
+    for(const num of nums){
+        freqObj[num] = (freqObj[num] || 0) +1
+    }
+    console.log("freq", freqObj);
+    nums.sort((a,b)=> {
+        const freqA = freqObj[a]
+        const freqB = freqObj[b]
+        if(freqA!== freqB) return freqB -freqA;
+        return a-b;
+    })
+    return nums
+}
+
+console.log("freq array", sortArrayByFrequency([4, 4, 1, 2, 2, 2, 3]));
