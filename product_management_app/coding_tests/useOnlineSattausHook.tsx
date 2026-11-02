@@ -23,3 +23,17 @@ export function useOnlineStatus() {
   // 5. Return the primitive value
   return isOnline;
 }
+
+function App() {
+  const isOnline = useOnlineStatus();
+  return (
+    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+      <h1>Online Status Checker</h1>
+      <p>
+        Status: <strong>{isOnline ? '🟢 Online' : '🔴 Offline'}</strong>
+      </p>
+    </div>
+  );
+}
+
+export default App;
